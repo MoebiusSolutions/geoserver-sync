@@ -56,9 +56,9 @@ import com.moesol.geoserver.sync.core.Sha1Value;
 import com.moesol.geoserver.sync.core.VersionFeatures;
 import com.moesol.geoserver.sync.filter.Sha1SyncFilterFunction;
 import com.moesol.geoserver.sync.format.FeatureCollectionSha1Sync;
+import com.moesol.geoserver.sync.grouper.Sha1JsonLevelGrouper;
 import com.moesol.geoserver.sync.json.Sha1SyncJson;
 import com.moesol.geoserver.sync.json.Sha1SyncPositionHash;
-import com.moseol.geoserver.sync.grouper.Sha1JsonLevelGrouper;
 
 /**
  * SHA-1 set check. The order of the features should not matter, just the set existence.

@@ -30,7 +30,7 @@ package com.moesol.geoserver.sync.core;
 
 import java.util.Arrays;
 
-import com.moseol.geoserver.sync.grouper.GroupPosition;
+import com.moesol.geoserver.sync.grouper.GroupPosition;
 
 /**
  * Value object to hold hash result.

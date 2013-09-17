@@ -65,9 +65,9 @@ import com.moesol.geoserver.sync.core.IdAndValueSha1Comparator;
 import com.moesol.geoserver.sync.core.ReconcilerDelete;
 import com.moesol.geoserver.sync.core.Sha1Value;
 import com.moesol.geoserver.sync.core.VersionFeatures;
+import com.moesol.geoserver.sync.grouper.Sha1JsonLevelGrouper;
 import com.moesol.geoserver.sync.json.Sha1SyncJson;
 import com.moesol.geoserver.sync.json.Sha1SyncPositionHash;
-import com.moseol.geoserver.sync.grouper.Sha1JsonLevelGrouper;
 
 /**
  * Synchronizes this client with geoserver using sha1Sync filter and sha1Sync outputFormat.
