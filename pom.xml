@@ -42,24 +42,25 @@
 
     <artifactId>geotools-sync-client</artifactId>
     <name>geotools-sync-client</name>
+    <version>2.0.7</version>
 
     <dependencies>
         <dependency>
             <groupId>org.geoserver.community</groupId>
             <artifactId>geoserver-sync-core</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.geoserver.community</groupId>
             <artifactId>geoserver-sync-core</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.geoserver.community</groupId>
             <artifactId>geoserver-sync-server</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -97,7 +98,7 @@
         <dependency>
             <groupId>org.geoserver</groupId>
             <artifactId>gs-main</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
@@ -109,7 +110,7 @@
         <dependency>
             <groupId>org.geoserver</groupId>
             <artifactId>gs-wfs</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
