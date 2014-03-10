@@ -75,7 +75,7 @@ public abstract class AbstractGeoserverClientSynchronizer {
 	private static final int INITIAL_LIST_SIZE = 4096;
 	private static final int MAX_ROUNDS = 21;
 	private static final String SHA1_SYNC_OUTPUT_FORMAT = "SyncChecksum";
-	private static final String GML3_OUTPUT_FORMAT = "SyncGML";
+	private static final String GML3_OUTPUT_FORMAT = "GML3";
 	public static PrintStream TRACE_POST = null;
 	private final FeatureSha1 m_featureSha1Sync = new FeatureSha1();
 	private final String m_url;
@@ -91,7 +91,7 @@ public abstract class AbstractGeoserverClientSynchronizer {
 	private long m_txBytes; // approximate, does not include HTTP overhead or UTF-8 escape sequences (if any).
 	private long m_parseMillis;
 	private RequestBuilder m_builder;
-	private String m_attributesToInclude = "-all";
+	private String m_attributesToInclude = "*";
 	private String m_lastOutputFormat;
 	private Sha1SyncJson m_server;
 	private List<HashAndFeatureValue> m_featureSha1s = new ArrayList<HashAndFeatureValue>(INITIAL_LIST_SIZE);
