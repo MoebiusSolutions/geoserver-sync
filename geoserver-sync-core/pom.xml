@@ -51,15 +51,15 @@
         </dependency>
         <dependency>
             <groupId>org.geoserver</groupId>
-            <artifactId>wfs</artifactId>
-            <version>${geoserver.version}</version>
+            <artifactId>gs-wfs</artifactId>
+            <version>${gs.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.geoserver</groupId>
-            <artifactId>main</artifactId>
-            <version>${geoserver.version}</version>
+            <artifactId>gs-main</artifactId>
+            <version>${gs.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-sample-data-access</artifactId>
-            <version>${geotools.version}</version>
+            <version>${gt.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
