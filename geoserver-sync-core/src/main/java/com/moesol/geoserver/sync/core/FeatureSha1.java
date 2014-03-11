@@ -34,10 +34,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
@@ -54,7 +57,6 @@ import org.opengis.geometry.Geometry;
  */
 public class FeatureSha1 {
 	private static final Logger LOGGER = Logger.getLogger(FeatureSha1.class.getName());
-	private static boolean SHA1_KEEP_NAME = Boolean.getBoolean("sha1.keep.name");
 	public static FeatureSha1Mapper MAPPER = new FeatureSha1Mapper() {
 		@Override
 		public Sha1Value map(Sha1Value old) {
@@ -109,36 +111,28 @@ public class FeatureSha1 {
 	}
 
 	void sha1Properties(Collection<Property> properties) {
-//		List<Property> sortedProperties = new ArrayList<Property>(properties.size());
-//		for (Property p : properties) {
-//			sortedProperties.add(p);
-//		}
-//		
-//		Collections.sort(sortedProperties, new Comparator<Property>() {
-//			@Override
-//			public int compare(Property o1, Property o2) {
-//				int r = o1.getName().getLocalPart().compareTo(o2.getName().getLocalPart());
-//				if (r != 0) {
-//					return r;
-//				}
-//				String ns1 = o1.getName().getNamespaceURI();
-//				String ns2 = o2.getName().getNamespaceURI();
-//				if (ns1 == null) {
-//					return ns2 == null ? 0 : -1;
-//				}
-//				return ns1.compareTo(ns2);
-//			}
-//		});
-//		
-//		for (Property p : sortedProperties) {
-//			if (p instanceof ComplexAttribute) {
-//				ComplexAttribute complex = (ComplexAttribute) p;
-//				sha1Properties(complex.getProperties());
-//			} else {
-//				sha1Property(p);
-//			}
-//		}
+		List<Property> sortedProperties = new ArrayList<Property>(properties.size());
 		for (Property p : properties) {
+			sortedProperties.add(p);
+		}
+		
+		Collections.sort(sortedProperties, new Comparator<Property>() {
+			@Override
+			public int compare(Property o1, Property o2) {
+				int r = o1.getName().getLocalPart().compareTo(o2.getName().getLocalPart());
+				if (r != 0) {
+					return r;
+				}
+				String ns1 = o1.getName().getNamespaceURI();
+				String ns2 = o2.getName().getNamespaceURI();
+				if (ns1 == null) {
+					return ns2 == null ? 0 : -1;
+				}
+				return ns1.compareTo(ns2);
+			}
+		});
+		
+		for (Property p : sortedProperties) {
 			if (p instanceof ComplexAttribute) {
 				ComplexAttribute complex = (ComplexAttribute) p;
 				sha1Properties(complex.getProperties());
@@ -168,11 +162,6 @@ public class FeatureSha1 {
 			LOGGER.log(Level.FINER, "Geometry skipped {0}", value);
 			return;
 		}
-		// TODO: Strangely some features have two names on the client.
-		if ("name".equals(p.getName().toString()) && !SHA1_KEEP_NAME) {
-			LOGGER.log(Level.FINER, "Name skipped {0}", value);
-			return;
-		}
 		if (value instanceof com.vividsolutions.jts.geom.Geometry) {
 			LOGGER.log(Level.FINER, "Geometry skipped {0}", value);
 			return;
@@ -183,7 +172,10 @@ public class FeatureSha1 {
 		}
 		if (value instanceof Calendar) {
 			Calendar cal = (Calendar) value;
-			value = cal.getTime(); // Make sure we use UTC
+			value = cal.getTime().getTime(); // Make sure we use UTC
+		}
+		if (value instanceof XMLGregorianCalendar) {
+			value = ((XMLGregorianCalendar) value).toGregorianCalendar().getTime().getTime();
 		}
 		if (value instanceof Date) {
 			Date date = (Date) value;
@@ -200,13 +192,21 @@ public class FeatureSha1 {
 	}
 
 	private boolean shouldSha1Property(Property p) {
-		if (m_attributesToInclude.contains(p.getName().toString())) {
+		String localName = p.getName().getLocalPart();
+
+		if (m_attributesToInclude.contains(localName)) {
 			return true;
 		}
-		if (m_attributesToInclude.contains("-all")) {
+		if (m_attributesToInclude.contains("-" + localName)) {
+			return false;
+		}
+		if (m_attributesToInclude.contains("-all")) { // deprecated
 			return true;
 		}
-		LOGGER.log(Level.FINER, "Skipping: {0}", p.getName());
+		if (m_attributesToInclude.contains("*")) {
+			return true;
+		}
+		LOGGER.log(Level.FINER, "Skipping: {0}", localName);
 		return false;
 	}
 

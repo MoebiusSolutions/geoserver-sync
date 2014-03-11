@@ -426,17 +426,22 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		FeatureSha1.MAPPER = new FeatureSha1Mapper() {
 			@Override
 			public Sha1Value map(Sha1Value old) {
-				if ("e76becbcfbe3b847478a3aa706def57382d8b884".equals(old.toString())) {
-					return old;
-				}
-				if ("ac93e7bcebb89813f206d9b618c94e1531cc6a0d".equals(old.toString())) {
-					return new Sha1Value("ba5a86a5a1c34f30e7e3a9e8eef485f025c8d606");
-				}
+				System.out.println("old " + old);
+				
+				// IDs
 				if ("88bfad9cfffeafd299a44d4daf979d57419a2621".equals(old.toString())) {
 					return old;
 				}
 				if ("2a7bc94a06f3221293677515044b0a9dd3960f4e".equals(old.toString())) {
 					return new Sha1Value("88bfad9cfffeafd299a44d4daf979d57419a2622");
+				}
+
+				// Values
+				if ("27f1edbff7fa42bd9160c13ab6b24927393cc0d4".equals(old.toString())) {
+					return old;
+				}
+				if ("48fbf0870bcc58da8e7a49d69295a72dd3c5f4ce".equals(old.toString())) {
+					return old;
 				}
 				throw new IllegalStateException("Mapping of input SHA1's has changed unable to setup test conditions: " + old);
 			}
@@ -480,19 +485,29 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		FeatureSha1.MAPPER = new FeatureSha1Mapper() {
 			@Override
 			public Sha1Value map(Sha1Value old) {
-				if ("e76becbcfbe3b847478a3aa706def57382d8b884".equals(old.toString())) {
-					return old;
-				}
-				if ("ac93e7bcebb89813f206d9b618c94e1531cc6a0d".equals(old.toString())) {
-					return new Sha1Value("ba5a86a5a1c34f30e7e3a9e8eef485f025c8d605");
-				}
+				System.out.println("old: " + old);
+
+				// IDs
 				if ("88bfad9cfffeafd299a44d4daf979d57419a2621".equals(old.toString())) {
 					return old;
 				}
 				if ("2a7bc94a06f3221293677515044b0a9dd3960f4e".equals(old.toString())) {
+					// Force collision.
 					return new Sha1Value("88bfad9cfffeafd299a44d4daf979d57419a2621");
 				}
-				throw new IllegalStateException("Mapping of input SHA1's has changed unable to setup test conditions.");
+				if ("ba5a86a5a1c34f30e7e3a9e8eef485f025c8d605".equals(old.toString())) {
+					return old;
+				}
+				
+				// Values
+				if ("27f1edbff7fa42bd9160c13ab6b24927393cc0d4".equals(old.toString())) {
+					return old;
+				}
+				if ("48fbf0870bcc58da8e7a49d69295a72dd3c5f4ce".equals(old.toString())) {
+					return old;
+				}
+				System.out.println("old: " + old);
+				throw new IllegalStateException("Mapping of input SHA1's has changed unable to setup test conditions: " + old);
 			}
 		};
 		
