@@ -26,12 +26,19 @@
 
 package com.moesol.geoserver.sync.client;
 
-
-
-
-import static com.moesol.geoserver.sync.client.Features.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static com.moesol.geoserver.sync.client.Features.asMap;
+import static com.moesol.geoserver.sync.client.Features.f;
+import static com.moesol.geoserver.sync.client.Features.featuresEq;
+import static com.moesol.geoserver.sync.client.Features.make;
+import static com.moesol.geoserver.sync.client.Features.makeConfiguration;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,36 +52,28 @@ import javax.xml.parsers.ParserConfigurationException;
 import net.opengis.wfs.FeatureCollectionType;
 
 import org.geoserver.wfs.WFSTestSupport;
+import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.identity.FeatureIdImpl;
+import org.junit.Test;
 import org.opengis.feature.Feature;
 import org.opengis.filter.identity.FeatureId;
 import org.opengis.filter.identity.Identifier;
 import org.xml.sax.SAXException;
 
-import com.moesol.geoserver.sync.client.FeatureAccessor;
-import com.moesol.geoserver.sync.client.FeatureChangeListener;
-import com.moesol.geoserver.sync.client.FeaturesChangedAdaptor;
-import com.moesol.geoserver.sync.client.FeaturesChangedListener;
-import com.moesol.geoserver.sync.client.GeoserverClientSynchronizer;
-import com.moesol.geoserver.sync.client.HashAndFeatureValue;
-import com.moesol.geoserver.sync.client.RequestBuilder;
-import com.moesol.geoserver.sync.client.RoundListener;
-import com.moesol.geoserver.sync.client.xml.ComplexFeatureCollection;
 import com.moesol.geoserver.sync.core.FeatureSha1;
 import com.moesol.geoserver.sync.core.FeatureSha1Mapper;
 import com.moesol.geoserver.sync.core.Sha1Value;
 import com.moesol.geoserver.sync.core.VersionFeatures;
 import com.vividsolutions.jts.io.ParseException;
 
-import static org.junit.Assert.*;
-
 public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 	
+	@Test
 	public void testParseWfs() throws IOException, SAXException, ParserConfigurationException {
 		GeoserverClientSynchronizer clientSynchronizer = new GeoserverClientSynchronizer(makeConfiguration(), "", SimulatedRequestBuilder.POST_TEMPLATE);
 		InputStream is = loadResource("buildings.xml");
-		ComplexFeatureCollection features = (ComplexFeatureCollection) clientSynchronizer.parseWfs(is);
+		FeatureCollection features = (FeatureCollection) clientSynchronizer.parseWfs(is);
 		assertEquals(2, features.size());
 		FeatureIterator<?> it = features.features();
 		try {
@@ -92,6 +91,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		}
 	}
 
+	@Test
 	public void testProcessGmlResponse() throws IOException, SAXException, ParserConfigurationException {
 		FeatureChangeListener listener = mock(FeatureChangeListener.class);
 		GeoserverClientSynchronizer clientSynchronizer = new GeoserverClientSynchronizer(makeConfiguration(), "", SimulatedRequestBuilder.POST_TEMPLATE);
@@ -109,6 +109,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		return new FeatureIdImpl(fid);
 	}
 
+	@Test
 	public void test_Client0_with_Server3() throws IOException, SAXException, ParserConfigurationException, ParseException {
 //		GeoserverClientSynchronizer.TRACE_POST = new PrintStream(new FileOutputStream("run.log"));
 //		FeatureCollectionSha1Sync.TRACE_RESPONSE = GeoserverClientSynchronizer.TRACE_POST;
@@ -133,6 +134,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(2, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void testSameSets_3() throws IOException, SAXException, ParserConfigurationException, ParseException {
 		FeatureCollectionType client = make(f("F1", 0), f("F2", 1), f("F3", 2));
 		FeatureCollectionType server = make(f("F1", 0), f("F2", 1), f("F3", 2));
@@ -154,6 +156,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(1, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void testUpdateOneFeature() throws ParseException, IOException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make(f("F1", 0), f("F2", 1), f("F3", 2));		
 		FeatureCollectionType server = make(f("F1", 0), f("F2", 3), f("F3", 2));
@@ -208,6 +211,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(2, synchronizer.getNumRounds());
 	}
 
+	@Test
 	public void testCreateOneFeature() throws ParseException, IOException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make(f("F1", 0), f("F2", 1), f("F3", 2));		
 		FeatureCollectionType server = make(f("F1", 0), f("F2", 1), f("F3", 2), f("F4", 3));
@@ -268,6 +272,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(2, synchronizer.getNumRounds());
 	}
 
+	@Test
 	public void test_Client3_with_Server0() throws IOException, ParseException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make(f("F1", 0), f("F2", 1), f("F3", 2));
 		FeatureCollectionType server = make();
@@ -286,6 +291,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(1, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client0_with_Server0() throws IOException, ParseException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make();
 		FeatureCollectionType server = make();
@@ -304,6 +310,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(1, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client0_with_Server1() throws IOException, ParseException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make();
 		FeatureCollectionType server = make(f("F1", 0));
@@ -322,6 +329,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(2, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client1_with_Server0() throws IOException, ParseException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make(f("F1", 0));
 		FeatureCollectionType server;
@@ -341,6 +349,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(1, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client1_with_Server1_Updated() throws IOException, ParseException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make(f("F1", 0));
 		FeatureCollectionType server = make(f("F1", 1));
@@ -359,6 +368,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(2, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client1_with_Server1_DifferentKey() throws IOException, ParseException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make(f("F1", 0));
 		FeatureCollectionType server = make(f("F2", 1));
@@ -377,6 +387,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(2, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client1_with_Server1_Same() throws IOException, ParseException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make(f("F1", 0));
 		FeatureCollectionType server;
@@ -404,6 +415,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
+	@Test
 	public void testDeleteOneFeatureInSameBucket() throws ParseException, IOException, SAXException, ParserConfigurationException  {
 		FeatureSha1Mapper old = FeatureSha1.MAPPER;
 		try {
@@ -416,10 +428,10 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		FeatureSha1.MAPPER = new FeatureSha1Mapper() {
 			@Override
 			public Sha1Value map(Sha1Value old) {
-				if ("ba5a86a5a1c34f30e7e3a9e8eef485f025c8d605".equals(old.toString())) {
+				if ("e76becbcfbe3b847478a3aa706def57382d8b884".equals(old.toString())) {
 					return old;
 				}
-				if ("b0cfdb0661eb1c8b1db7e957915c05f8f2d43aa7".equals(old.toString())) {
+				if ("ac93e7bcebb89813f206d9b618c94e1531cc6a0d".equals(old.toString())) {
 					return new Sha1Value("ba5a86a5a1c34f30e7e3a9e8eef485f025c8d606");
 				}
 				if ("88bfad9cfffeafd299a44d4daf979d57419a2621".equals(old.toString())) {
@@ -428,7 +440,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 				if ("2a7bc94a06f3221293677515044b0a9dd3960f4e".equals(old.toString())) {
 					return new Sha1Value("88bfad9cfffeafd299a44d4daf979d57419a2622");
 				}
-				throw new IllegalStateException("Mapping of input SHA1's has changed unable to setup test conditions.");
+				throw new IllegalStateException("Mapping of input SHA1's has changed unable to setup test conditions: " + old);
 			}
 		};
 		
@@ -457,6 +469,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(21, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void testSha1Collision() throws ParseException, IOException, SAXException, ParserConfigurationException  {
 		FeatureSha1Mapper old = FeatureSha1.MAPPER;
 		try {
@@ -469,10 +482,10 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		FeatureSha1.MAPPER = new FeatureSha1Mapper() {
 			@Override
 			public Sha1Value map(Sha1Value old) {
-				if ("ba5a86a5a1c34f30e7e3a9e8eef485f025c8d605".equals(old.toString())) {
+				if ("e76becbcfbe3b847478a3aa706def57382d8b884".equals(old.toString())) {
 					return old;
 				}
-				if ("b0cfdb0661eb1c8b1db7e957915c05f8f2d43aa7".equals(old.toString())) {
+				if ("ac93e7bcebb89813f206d9b618c94e1531cc6a0d".equals(old.toString())) {
 					return new Sha1Value("ba5a86a5a1c34f30e7e3a9e8eef485f025c8d605");
 				}
 				if ("88bfad9cfffeafd299a44d4daf979d57419a2621".equals(old.toString())) {
@@ -510,6 +523,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		verify(roundListener).sha1Collision();
 	}
 
+	@Test
 	public void testDeleteOneFeature() throws ParseException, IOException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make(f("F0", -1), f("F1", 0), f("F2", 1), f("F2.1", 22), f("F3", 2), f("F4", 3));
 		FeatureCollectionType server = make(f("F0", -1), f("F1", 0), f("F2", 1), f("F3", 2), f("F4", 3));
@@ -567,6 +581,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(2, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client0_with_Server1K() throws IOException, SAXException, ParserConfigurationException, ParseException {
 		FeatureCollectionType client = make();		
 		FeatureCollectionType server = make(makeManyFeatures(1000));
@@ -589,6 +604,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(4, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client0_with_Server5K() throws IOException, SAXException, ParserConfigurationException, ParseException {
 		int N = 5000;
 		FeatureCollectionType client = make();		
@@ -612,6 +628,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(4, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client0_with_Server10K() throws IOException, SAXException, ParserConfigurationException, ParseException {
 		FeatureCollectionType client = make();		
 		FeatureCollectionType server = make(makeManyFeatures(10000));
@@ -634,6 +651,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(5, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client70K_with_Server100K() throws IOException, SAXException, ParserConfigurationException, ParseException {
 		FeatureCollectionType client = make(makeManyFeatures(70000));		
 		FeatureCollectionType server = make(makeManyFeatures(100000));
@@ -656,6 +674,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(5, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client100K_with_Server70K() throws IOException, SAXException, ParserConfigurationException, ParseException {
 		FeatureCollectionType client = make(makeManyFeatures(100000));		
 		FeatureCollectionType server = make(makeManyFeatures(70000));
@@ -678,6 +697,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(5, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void test_Client10K_with_Server0() throws IOException, SAXException, ParserConfigurationException, ParseException {
 		FeatureCollectionType client = make(makeManyFeatures(10000));		
 		FeatureCollectionType server = make();
@@ -696,6 +716,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(1, synchronizer.getNumRounds());
 	}
 
+	@Test
 	public void testSameSets_10K() throws IOException, SAXException, ParserConfigurationException, ParseException {
 		int N = 10000;
 		FeatureCollectionType client = make(makeManyFeatures(N));
@@ -719,6 +740,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(1, synchronizer.getNumRounds());
 	}
 
+	@Test
 	public void testBulkListenerAdaptor() throws IOException, SAXException, ParserConfigurationException, ParseException {
 		FeatureCollectionType client = make(f("U1", 21), f("U2", 22), f("D1", 91), f("D2", 92), f("D3", 93));
 		FeatureCollectionType server = make(f("C1", 1), f("C2", 2), f("C3", 3), f("U1", 121), f("U2", 122));
@@ -745,6 +767,7 @@ public class GeoserverClientSynchronizerIntegrationTest extends WFSTestSupport {
 		assertEquals(2, synchronizer.getNumRounds());
 	}
 	
+	@Test
 	public void testAgainstOldServer() throws IOException, ParseException, SAXException, ParserConfigurationException {
 		FeatureCollectionType client = make(f("F1", 0));
 		FeatureCollectionType server = make(f("F1", 1));
