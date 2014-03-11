@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>geoserver.sync</groupId>
 		<artifactId>geoserver-sync</artifactId>
-		<version>2.0.6-SNAPSHOT</version>
+		<version>2.0.8-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>geotools-sync-client</artifactId>
